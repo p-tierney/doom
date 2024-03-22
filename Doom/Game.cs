@@ -7,6 +7,7 @@ namespace Doom;
 public interface ISprites
 {
     void DrawLine(Vector2 start, float distance, float angle, Color color);
+    void DrawRectangle(Rectangle rectangle, Color color);
 }
 
 public class DoomGame: Game
@@ -53,15 +54,14 @@ public class DoomGame: Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.White);
+        GraphicsDevice.Clear(Color.Black);
 
         spriteBatch.Begin();
         foreach (var mapLocation in map.NonEmptyLocations)
         {
-            spriteBatch.Draw(whitePixel, mapLocation.Rectangle,  Color.DarkGray);
+            //spriteBatch.Draw(whitePixel, mapLocation.Rectangle,  Color.DarkGray);
         }
-        spriteBatch.Draw(whitePixel, player.Rectangle,  Color.LightGreen);
-        
+        //spriteBatch.Draw(whitePixel, player.Rectangle,  Color.LightGreen);
 
         rayCaster.RayCast(player, map, new Sprites(spriteBatch, whitePixel));
         //var (x, y) = player.Rectangle.Center;
@@ -109,6 +109,11 @@ public class DoomGame: Game
 
     public class Sprites(SpriteBatch spriteBatch, Texture2D whitePixel) : ISprites
     {
+        public void DrawRectangle(Rectangle rectangle, Color color)
+        {
+            spriteBatch.Draw(whitePixel, rectangle, color);
+        }
+
         public void DrawLine(Vector2 start, float distance, float angle, Color color)
         {
             spriteBatch.Draw(whitePixel, new Rectangle((int) start.X, (int) start.Y, (int) distance, 1), null, Color.Yellow, angle, Vector2.Zero, SpriteEffects.None, 0);

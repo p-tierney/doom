@@ -11,6 +11,8 @@ public class RayCaster(DoomGame game)
     public const float DeltaAngle = FieldOfView / NumberOfRays;
     public const int MaxDepth = 20;
     public const float TinyFloat = 0.00001f;
+    public static readonly float ScreenDistance = Screen.HalfWidth / MathF.Tan(HalfFieldOfView);
+    public const int Scale = Screen.Width / NumberOfRays;
 
     private List<Ray> CalculateRays(IPlayer player, IMap map)
     {
@@ -20,11 +22,11 @@ public class RayCaster(DoomGame game)
 
         return Enumerable.Range(0, NumberOfRays)
             .Select(i => startAngle + (i * DeltaAngle))
-            .Select(rayAngle => 
+            .Select((rayAngle, i) => 
             {
                 var (sin, cos) = MathF.SinCos(rayAngle);
                 var distance = MathF.Min(DoHorizontals(), DoVerticals());
-                return new Ray(rayAngle, distance);
+                return new Ray(i, rayAngle, distance);
 
                 float DoHorizontals() 
                 {
@@ -67,14 +69,19 @@ public class RayCaster(DoomGame game)
 
     public void RayCast(IPlayer player, IMap map, ISprites sprites) 
     {
+        var playerAngle = player.Angle;
+
         foreach (var ray in CalculateRays(player, map))
         {
-            sprites.DrawLine(player.Position * Screen.TileSize, ray.Distance * Screen.TileSize, ray.Angle, Color.Yellow);
+            var depth = ray.Distance * MathF.Cos(playerAngle - ray.Angle);
+            var projectedHeight = ScreenDistance / depth;
+            var rectangle = new Rectangle(ray.Index * Scale, (int)(Screen.HalfHeight - projectedHeight / 2), Scale, (int)projectedHeight);
+            sprites.DrawRectangle(rectangle, Color.Lerp(Color.White, Color.Black, depth / Map.Width));
         }
 
     }
 
-    public record Ray(float Angle, float Distance) 
+    public record Ray(int Index, float Angle, float Distance) 
     {
     }
 }
