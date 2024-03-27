@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 
 namespace Doom;
@@ -15,6 +16,8 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
     public const float StartAngle = 0f;
     public const float Speed = 0.004f;
     public const float RotationSpeed = 0.002f;
+    public const float Size = 0.25f;
+    public const float HalfSize = Size / 2f;
 
     public Vector2 Position => new(x, y);
     public float Angle => angle;
@@ -23,10 +26,23 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
     public (int X, int Y) MapPosition = ((int)x, (int) y);
 
     private void SetAngle(float value) => angle = value %= MathF.Tau;
+
+    private static readonly List<Vector2> Corners = [
+        new(-HalfSize, -HalfSize), // top-left
+        new(HalfSize, -HalfSize), // top-right
+        new(HalfSize, HalfSize), // bottom-right
+        new(-HalfSize, HalfSize), // bottom-left
+    ];
+
+    private bool IsWall(Vector2 centre)
+    {
+        return Corners.Select(corner => centre + corner).Any(corner => game.Map.IsWall(corner.X, corner.Y));
+    }
+
     private void SetPosition(float dx, float dy)
     {
-        if (!game.Map.IsWall(x + dx, y)) x += dx;
-        if (!game.Map.IsWall(x, y + dy)) y += dy;
+        if (!IsWall(new(x + dx, y))) x += dx;
+        if (!IsWall(new(x, y + dy))) y += dy;
     }
 
     public void DoMovement(DoomGame.Frame frame)
