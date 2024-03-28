@@ -5,8 +5,8 @@ namespace Doom;
 
 public class ObjectRenderer(DoomGame game)
 {
-    public const int TextureSize = 256;
-    public const int HalfTextureSize = TextureSize / 2;
+    //public const int TextureSize = 256;
+    //public const int HalfTextureSize = TextureSize / 2;
 
     private IDictionary<int, Texture2D> textures;
 
@@ -29,9 +29,12 @@ public class ObjectRenderer(DoomGame game)
     {
         foreach (var ray in rays)
         {
-            var texture = textures[ray.WallTexture];
+            var texture = textures[int.Parse(ray.Wall.MiniMapChar.ToString())];
             var rectangle = new Rectangle(ray.Index * RayCaster.Scale, (int)(Screen.HalfHeight - ray.ProjectedHeight / 2f), RayCaster.Scale, (int)ray.ProjectedHeight);
-            var sourceRectangle = new Rectangle((int)(ray.WallTextureOffset * texture.Width), 0, RayCaster.Scale, texture.Height);
+
+            var startTexture = (int)(ray.WallTextureOffset * texture.Width);
+            var endTexture = (int) (MathF.Sin(RayCaster.DeltaAngle) * ray.Depth * texture.Width);
+            var sourceRectangle = new Rectangle(startTexture, 0, endTexture, texture.Height);
             spriteBatch.Draw(texture, rectangle, sourceRectangle, Color.Lerp(Color.White, Color.Black, ray.Depth / Map.Width));
         }
     }

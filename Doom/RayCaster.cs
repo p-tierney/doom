@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.Xna.Framework;
 
 namespace Doom;
@@ -7,7 +6,7 @@ public class RayCaster(DoomGame game)
 {
     public const float FieldOfView = MathF.PI / 3f;
     public const float HalfFieldOfView = FieldOfView / 2f;
-    public const int NumberOfRays = Screen.Width; // / 2;
+    public const int NumberOfRays = Screen.Width / 1;
     public const int HalfNumberOfRays = NumberOfRays / 2;
     public const float DeltaAngle = FieldOfView / NumberOfRays;
     //public const int MaxDepth = 20;
@@ -31,7 +30,7 @@ public class RayCaster(DoomGame game)
                 var bestCandidate = h.Distance <= v.Distance ? h : v;
                 var depth = bestCandidate.Distance * MathF.Cos(playerAngle - rayAngle);
                 var projectedHeight = ScreenDistance / depth;
-                return new Ray(i, depth, projectedHeight, bestCandidate.WallTexture.GetValueOrDefault(), bestCandidate.WallTextureOffset.GetValueOrDefault());
+                return new Ray(i, depth, projectedHeight, bestCandidate.Wall!, bestCandidate.WallTextureOffset.GetValueOrDefault());
 
                 RayCandidate DoHorizontals() 
                 {
@@ -48,10 +47,10 @@ public class RayCaster(DoomGame game)
 
                         if (map.IsWall(tileEdge, rayPosition.Y, out var location))
                         {
-                            var texture = int.Parse(location.MiniMapChar.ToString());
+                            //var texture = int.Parse(location.MiniMapChar.ToString());
                             var newY = rayPosition.Y % 1f;
                             var textureOffset = lookingRight ? newY : 1 - newY;
-                            return new RayCandidate(movement.Length(), texture, textureOffset);
+                            return new RayCandidate(movement.Length(), location, textureOffset);
                         }
                     }
                     return RayCandidate.Max;
@@ -72,10 +71,10 @@ public class RayCaster(DoomGame game)
 
                         if (map.IsWall(rayPosition.X, tileEdge, out var location))
                         {
-                            var texture = int.Parse(location.MiniMapChar.ToString());
+                            //var texture = int.Parse(location.MiniMapChar.ToString());
                             var newX = rayPosition.X % 1f;
                             var textureOffset = lookingDown ? newX : 1 - newX;
-                            return new RayCandidate(movement.Length(), texture, textureOffset);
+                            return new RayCandidate(movement.Length(), location, textureOffset);
                         }
                     }
                     return RayCandidate.Max;
@@ -99,17 +98,12 @@ public class RayCaster(DoomGame game)
     }
     */
 
-    private record RayCandidate(float Distance, int? WallTexture = null, float? WallTextureOffset = null)
+    private record RayCandidate(float Distance, Map.Location? Wall = null, float? WallTextureOffset = null)
     {
         public static readonly RayCandidate Max = new(float.MaxValue);
     }
 
-    public record OldRay(int Index, float Angle, float Distance, int WallTexture, float WallTextureOffset)
-    {
-        
-    }
-
-    public record Ray(int Index, float Depth, float ProjectedHeight, int WallTexture, float WallTextureOffset)
+    public record Ray(int Index, float Depth, float ProjectedHeight, Map.Location Wall, float WallTextureOffset)
     {
     }
 }

@@ -52,7 +52,7 @@ public class Map(List<List<Map.Location>> miniMap): IMap
     1  1111        1
     1              1
     1   1   1      1
-    1111111111111111
+    1234512345123451
     """;
 
     public static List<List<Location>> ReadMiniMap()
