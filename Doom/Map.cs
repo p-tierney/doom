@@ -9,6 +9,11 @@ public interface IMap
     Map.Location Location(float x, float y) => Location((int) x, (int) y);
     bool IsWall(int x, int y) => Location(x, y).IsWall;
     bool IsWall(float x, float y) => IsWall((int) x, (int) y);
+    bool IsWall(float x, float y, out Map.Location location)
+    {
+        location = Location(x, y);
+        return location.IsWall;
+    }
 }
 
 public class Map(List<List<Map.Location>> miniMap): IMap
@@ -24,8 +29,22 @@ public class Map(List<List<Map.Location>> miniMap): IMap
         public bool IsWall => MiniMapChar != ' ';
     };
 
+    /*
     public const string MiniMap = """
     1111111111111111
+    1              1
+    1  1111   111  1
+    1     1     1  1
+    1     1     1  1
+    1  1111        1
+    1              1
+    1   1   1      1
+    1111111111111111
+    """;
+    */
+
+    public const string MiniMap = """
+    1234512345123451
     1              1
     1  1111   111  1
     1     1     1  1
@@ -54,5 +73,5 @@ public class Map(List<List<Map.Location>> miniMap): IMap
             .ToList();
     }
 
-    Location IMap.Location(int x, int y) => miniMap[y][x];
+    Location IMap.Location(int x, int y) => miniMap[int.Clamp(y, 0, Height - 1)][int.Clamp(x, 0, Width - 1)];
 }

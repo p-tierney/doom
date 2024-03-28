@@ -25,6 +25,7 @@ public class DoomGame: Game
     public IPlayer Player => player;
 
     private readonly Player player;
+    private readonly ObjectRenderer objectRenderer;
     private readonly RayCaster rayCaster;
 
     public DoomGame()
@@ -40,11 +41,15 @@ public class DoomGame: Game
 
         map = new Map(Doom.Map.ReadMiniMap());
         player = new Player(this);
+        objectRenderer = new ObjectRenderer(this);
         rayCaster = new RayCaster(this);
+
     }
 
     protected override void LoadContent()
     {
+        objectRenderer.LoadContent(GraphicsDevice);
+
         spriteBatch = new SpriteBatch(GraphicsDevice);
         whitePixel = new Texture2D(GraphicsDevice, 1, 1);
         whitePixel.SetData([Color.White]);
@@ -63,7 +68,10 @@ public class DoomGame: Game
         }
         //spriteBatch.Draw(whitePixel, player.Rectangle,  Color.LightGreen);
 
-        rayCaster.RayCast(player, map, new Sprites(spriteBatch, whitePixel));
+        var rays = rayCaster.CalculateRays(player, map);
+        objectRenderer.Draw(spriteBatch, player, rays);
+
+        //var rays = rayCaster.RayCast(player, map, new Sprites(spriteBatch, whitePixel));
         //var (x, y) = player.Rectangle.Center;
         //spriteBatch.Draw(whitePixel, new Rectangle(x, y, Screen.Width, 1), null, Color.Yellow, player.Angle, Vector2.Zero, SpriteEffects.None, 0);
         spriteBatch.End();
