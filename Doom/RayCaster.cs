@@ -50,6 +50,13 @@ public class RayCaster(DoomGame game)
                             //var texture = int.Parse(location.MiniMapChar.ToString());
                             var newY = rayPosition.Y % 1f;
                             var textureOffset = lookingRight ? newY : 1 - newY;
+
+                            //var (s, c) = MathF.SinCos(rayAngle + DeltaAngle);
+                            //var d = dx / c;
+                            //var y = playerY + d * s;
+                            var textureEnd = playerY + MathF.Tan(rayAngle + DeltaAngle) * dx;
+
+
                             return new RayCandidate(movement.Length(), location, textureOffset);
                         }
                     }
@@ -73,7 +80,7 @@ public class RayCaster(DoomGame game)
                         {
                             //var texture = int.Parse(location.MiniMapChar.ToString());
                             var newX = rayPosition.X % 1f;
-                            var textureOffset = lookingDown ? newX : 1 - newX;
+                            var textureOffset = !lookingDown ? newX : 1 - newX;
                             return new RayCandidate(movement.Length(), location, textureOffset);
                         }
                     }

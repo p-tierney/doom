@@ -45,13 +45,13 @@ public class Map(List<List<Map.Location>> miniMap): IMap
 
     public const string MiniMap = """
     1234512345123451
-    1              1
-    1  1111   111  1
-    1     1     1  1
-    1     1     1  1
+    1              2
+    1  1111   111  3
+    1     1     1  4
+    1     1     1  5
     1  1111        1
-    1              1
-    1   1   1      1
+    1              2
+    1   1   1      3
     1234512345123451
     """;
 

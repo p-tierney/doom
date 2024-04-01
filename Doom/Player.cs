@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 
 namespace Doom;
@@ -18,6 +17,10 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
     public const float RotationSpeed = 0.002f;
     public const float Size = 0.25f;
     public const float HalfSize = Size / 2f;
+    public const float MouseSensitivity = 0.5f;
+    public const int MouseMaximumRelative = 40;
+    public const int MouseBorderLeft = 30;
+    public const int MouseBorderRight = Screen.Width - 30;
 
     public Vector2 Position => new(x, y);
     public float Angle => angle;
@@ -25,7 +28,7 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
 
     public (int X, int Y) MapPosition = ((int)x, (int) y);
 
-    private void SetAngle(float value) => angle = value %= MathF.Tau;
+    public void SetAngle(float value) => angle = value %= MathF.Tau;
 
     private static readonly List<Vector2> Corners = [
         new(-HalfSize, -HalfSize), // top-left
@@ -48,13 +51,14 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
     public void DoMovement(DoomGame.Frame frame)
     {
         var (sin, cos) = MathF.SinCos(angle);
-        var speed = Player.Speed * frame.ElapsedTimeInMillis;
+        var speed = Speed * frame.ElapsedTimeInMillis;
         var (speedSin, speedCos) = (sin * speed, cos * speed);
 
         var (dx, dy) = CalculateChangeInPosition();
         SetPosition(dx, dy);
 
-        SetAngle(CalculateNewAngle());
+        //SetAngle(CalculateNewAngle());
+        SetAngle(frame);
 
         (float, float) CalculateChangeInPosition()
         {
@@ -72,10 +76,35 @@ public class Player(DoomGame game, float x = Player.StartX, float y = Player.Sta
         {
             return frame.Rotation switch
             {
-                PlayerRotation.Clockwise => angle += Player.RotationSpeed * frame.ElapsedTimeInMillis,
-                PlayerRotation.AntiClockwise => angle -= Player.RotationSpeed * frame.ElapsedTimeInMillis,
+                PlayerRotation.Clockwise => angle += RotationSpeed * frame.ElapsedTimeInMillis,
+                PlayerRotation.AntiClockwise => angle -= RotationSpeed * frame.ElapsedTimeInMillis,
                 _ => angle,
             };
+        }
+    }
+
+/*
+    Vector2 mouseDifference;
+const float MAXDELTA = 6; // Set to the appropriate value.
+mouseNow = Mouse.GetState();
+if (mouseNow.X != mouseDefaultPos.X || mouseNow.Y != mouseDefaultPos.Y)
+{
+    mouseDifference.X = Math.Min(MAXDELTA, mouseDefaultPos.X - mouseNow.X);
+    mouseDifference.Y = Math.Min(MAXDELTA, mouseDefaultPos.Y - mouseNow.Y);
+    leftrightRot += mouseSens * mouseDifference.X;
+    updownRot += mouseSens * mouseDifference.Y;
+
+    Mouse.SetPosition((int)mouseDefaultPos.X, (int)mouseDefaultPos.Y);
+
+    UpdateViewMatrix();
+}}
+*/
+    private void SetAngle(DoomGame.Frame frame)
+    {
+        if (frame.Look.RelativeX != 0)
+        {
+            var relative = int.Clamp(frame.Look.RelativeX, -MouseMaximumRelative, MouseMaximumRelative);
+            SetAngle(angle + relative * MouseSensitivity * frame.ElapsedTimeInMillis);
         }
     }
 
@@ -94,3 +123,5 @@ public enum PlayerRotation
 {
     None, Clockwise, AntiClockwise
 }
+
+
