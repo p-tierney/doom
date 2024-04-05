@@ -14,7 +14,7 @@ public class ObjectRenderer(DoomGame game)
 
     public void LoadContent(GraphicsDevice graphicsDevice)
     {
-        skyTexture = Texture2D.FromFile(graphicsDevice, $"resources/textures/sky.png");
+        skyTexture = Texture2D.FromFile(graphicsDevice, "resources/textures/sky.png");
 
         textures = Enumerable.Range(1, 5)
             .ToDictionary(i => i, i =>
@@ -22,30 +22,28 @@ public class ObjectRenderer(DoomGame game)
                 var texture = Texture2D.FromFile(graphicsDevice, $"resources/textures/{i}.png");
                 return texture;
             });
-
-        /*
-        foreach (var texture in textures)
-        {
-            Console.WriteLine($"{texture.Key} = > {texture.Value.Width} x {texture.Value.Height}");
-        }
-        */
     }
 
-    public void Draw(SpriteBatch spriteBatch, bool spaceDown, IPlayer player, List<RayCaster.Ray> rays)
+    public void Draw(SpriteBatch spriteBatch, List<IObject> objects)
     {
         spriteBatch.Draw(skyTexture, new Rectangle(-skyOffset, 0, Screen.Width, Screen.HalfHeight), Color.White);
         spriteBatch.Draw(skyTexture, new Rectangle(-skyOffset + Screen.Width, 0, Screen.Width, Screen.HalfHeight), Color.White);
 
-        foreach (var ray in rays)
+        foreach (var o in objects.Where(x => x.Depth < Map.Width).OrderByDescending(x => x.Depth))
         {
-            var texture = textures[int.Parse(ray.Wall.MiniMapChar.ToString())];
-            var rectangle = new Rectangle(ray.Index * RayCaster.Scale, (int)(Screen.HalfHeight - ray.ProjectedHeight / 2f), RayCaster.Scale, (int)ray.ProjectedHeight);
-
-            var startTexture = (int)(ray.WallTextureOffset * texture.Width);
-            var endTexture = spaceDown ? (int) (MathF.Sin(RayCaster.DeltaAngle) * ray.Depth * texture.Width) : RayCaster.Scale;
-            var sourceRectangle = new Rectangle(startTexture, 0, endTexture, texture.Height);
-            spriteBatch.Draw(texture, rectangle, sourceRectangle, Color.Lerp(Color.White, Color.Black, ray.Depth / Map.Width));
+            spriteBatch.Draw(o.Texture, o.Rectangle, o.TextureRectangle, Color.Lerp(Color.White, Color.Black, o.Depth / Map.Width));
         }
+    }
+
+    public interface IObject
+    {
+        //float X { get; } 
+        float Depth { get; }
+        //float ProjectedWidth  { get; }
+        //float ProjectedHeight  { get; }
+        Texture2D Texture  { get; }
+        Rectangle Rectangle { get; }
+        Rectangle? TextureRectangle { get; }
     }
 
     internal void Update(DoomGame.Frame frame)

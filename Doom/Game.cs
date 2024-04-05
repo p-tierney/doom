@@ -27,6 +27,7 @@ public class DoomGame: Game
     private readonly Player player;
     private readonly ObjectRenderer objectRenderer;
     private readonly RayCaster rayCaster;
+    private readonly SpriteObject spriteObject;
 
     public DoomGame()
     {
@@ -43,6 +44,8 @@ public class DoomGame: Game
         player = new Player(this);
         objectRenderer = new ObjectRenderer(this);
         rayCaster = new RayCaster(this);
+
+        spriteObject = new SpriteObject(this, 10.5f, 3.5f, 0.7f, 0.27f, "candlebra");
     }
 
     protected override void Initialize()
@@ -53,7 +56,9 @@ public class DoomGame: Game
     }
     protected override void LoadContent()
     {
+        rayCaster.LoadContent(GraphicsDevice);
         objectRenderer.LoadContent(GraphicsDevice);
+        spriteObject.LoadContent(GraphicsDevice);
 
         spriteBatch = new SpriteBatch(GraphicsDevice);
         whitePixel = new Texture2D(GraphicsDevice, 1, 1);
@@ -73,8 +78,12 @@ public class DoomGame: Game
         }
         //spriteBatch.Draw(whitePixel, player.Rectangle,  Color.LightGreen);
 
-        var rays = rayCaster.CalculateRays(player, map);
-        objectRenderer.Draw(spriteBatch, spaceDown, player, rays);
+
+        List<ObjectRenderer.IObject> objects = rayCaster.CalculateRays(player, map).Cast<ObjectRenderer.IObject>().ToList();
+        objects.Add(spriteObject.Get(gameTime, player));
+        objectRenderer.Draw(spriteBatch, objects);
+
+        //spriteObject.Draw(spriteBatch, sprite);
 
         //var rays = rayCaster.RayCast(player, map, new Sprites(spriteBatch, whitePixel));
         //var (x, y) = player.Rectangle.Center;
